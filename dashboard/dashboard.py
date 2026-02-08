@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-# Konfigurasi Halaman
+#Konfigurasi Halaman
 st.set_page_config(
     page_title="Bike Sharing Dashboard",
     page_icon="🚲",
     layout="wide"
 )
 
-# Load Data
+#Load Data
 @st.cache_data
 def load_data():
     try:
@@ -27,10 +27,10 @@ def load_data():
         st.error("File `dashboard/main_data.csv` tidak ditemukan. Jalankan preprocessing terlebih dahulu.")
         st.stop()
 
-# Inisialisasi Data
+#Inisialisasi Data
 df = load_data()
 
-# Sidebar Filter
+#Sidebar Filter
 st.sidebar.header("FilterWhere")
 selected_years = st.sidebar.multiselect(
     "Tahun",
@@ -48,7 +48,7 @@ selected_weather = st.sidebar.multiselect(
     default=sorted(df['weathersit_label'].unique())
 )
 
-# Filter data
+#Filter data
 filtered_df = df[
     (df['year'].isin(selected_years)) &
     (df['season_label'].isin(selected_seasons)) &
@@ -58,13 +58,13 @@ if filtered_df.empty:
     st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
     st.stop()
 
-# Header
+#Header
 st.title("🚲 Bike Sharing Analysis Dashboard")
 st.markdown("""
 Dashboard ini menganalisis pola penggunaan sepeda berdasarkan karakteristik pengguna dan kondisi eksternal.
 """)
 
-# Metrics Ringkasan
+#Metrics Ringkasan
 total_rentals = filtered_df['cnt'].sum()
 avg_daily = filtered_df['cnt'].mean()
 casual_ratio = filtered_df['casual_ratio'].mean()
@@ -73,14 +73,14 @@ col1.metric("Total Sewa", f"{total_rentals:,}")
 col2.metric("Rata-rata/Hari", f"{avg_daily:.0f}")
 col3.metric("Rata-rata Casual %", f"{casual_ratio:.1f}%")
 
-# Visualisasi 1: Perbedaan Pola Pengguna
+#Visualisasi 1: Perbedaan Pola Pengguna
 st.subheader("📊 Perbedaan Pola: Pengguna Casual vs Registered")
 st.markdown("""
 Pengguna casual dominan pada musim panas dan akhir pekan (pola rekreasi),
 sedangkan pengguna registered lebih aktif di hari kerja (pola komuter).
 """)
 
-# Agregasi per musim
+#Agregasi per musim
 season_usage = (
     filtered_df.groupby('season_label')[['casual', 'registered']]
     .mean()
@@ -95,7 +95,7 @@ season_usage['Tipe Pengguna'] = season_usage['Tipe Pengguna'].map({
 
 fig1, ax1 = plt.subplots(figsize=(10, 6))
 
-# Hitung nilai maksimum untuk menentukan skala
+#Hitung nilai maksimum untuk menentukan skala
 max_value = season_usage['Rata-rata Sewa'].max()
 ax1.set_ylim(0, max_value * 1.25)
 
@@ -106,7 +106,7 @@ sns.barplot(
     hue='Tipe Pengguna',
     palette=['#66c2a5', '#fc8d62'],
     ax=ax1,
-    errorbar=None  # Matikan error bar untuk tampilan yang lebih bersih
+    errorbar=None
 )
 ax1.set_title('Rata-rata Sewa Harian per Musim oleh Tipe Pengguna', fontsize=14, fontweight='bold')
 ax1.set_xlabel('Musim')
@@ -136,14 +136,14 @@ for i, container in enumerate(ax1.containers):
 
 st.pyplot(fig1)
 
-# Visualisasi 2: Pengaruh Cuaca (Tetap Diperbaiki)
+#Visualisasi 2: Pengaruh Cuaca
 st.subheader("🌤️ Pengaruh Kondisi Cuaca terhadap Total Sewa")
 st.markdown("""
 Kondisi cerah menghasilkan sewa tertinggi.
 Hujan/salju ringan menurunkan sewa hingga >60% dibanding cuaca cerah.
 """)
 
-# Urutan cuaca
+#Urutan cuaca
 weather_order = ['Clear', 'Mist', 'Light Rain/Snow']
 weather_stats = (
     filtered_df[filtered_df['weathersit_label'].isin(weather_order)]
@@ -157,7 +157,7 @@ weather_stats = (
 
 fig2, ax2 = plt.subplots(figsize=(10, 5.5))
 
-# Hitung ruang ekstra untuk label di atas batang tertinggi
+#Hitung ruang ekstra untuk label di atas batang tertinggi
 max_value = weather_stats['Rata-rata Sewa'].max()
 ax2.set_ylim(0, max_value * 1.3)
 
@@ -167,7 +167,7 @@ bars = ax2.bar(
     color=['#1f77b4', '#ff7f0e', '#d62728']
 )
 
-# Tambahkan label dengan background putih untuk keterbacaan
+#Tambahkan label dengan background putih untuk keterbacaan
 for bar, row in zip(bars, weather_stats.itertuples()):
     height = bar.get_height()
     ax2.text(
@@ -194,20 +194,20 @@ ax2.set_axisbelow(True)
 
 st.pyplot(fig2)
 
-# Insight Utama
+#Insight Utama
 st.info("""
 🔍 Insight Utama dari Analisis:
-Segmentasi Pengguna:
-Komuter (368 hari): >85% registered → target promosi loyalitas
-Rekreasi (162 hari): >35% casual → target promosi akhir pekan & musim panas
-Faktor Cuaca:
-Suhu ↑ → Sewa ↑ (korelasi kuat: r=0.63)
-Hujan ringan → Penurunan sewa hingga 63%
-Rekomendasi Bisnis:
-Tingkatkan konversi casual → registered via promo musiman
-Siapkan sistem notifikasi cuaca untuk antisipasi penurunan sewa
+• Segmentasi Pengguna:
+  - Komuter (368 hari): >85% registered → target promosi loyalitas
+  - Rekreasi (162 hari): >35% casual → target promosi akhir pekan & musim panas
+• Faktor Cuaca:
+  - Suhu ↑ → Sewa ↑ (korelasi kuat: r=0.63)
+  - Hujan ringan → Penurunan sewa hingga 63%
+• Rekomendasi Bisnis:
+  - Tingkatkan konversi casual → registered via promo musiman
+  - Siapkan sistem notifikasi cuaca untuk antisipasi penurunan sewa
 """)
 
-# Footer
+#Footer
 st.markdown("---")
 st.caption("Dashboard ini dibuat untuk memenuhi Proyek Analisis Data Dicoding | Data Source: Bike Sharing Dataset")
