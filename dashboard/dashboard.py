@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-#  Konfigurasi Halaman 
+# Konfigurasi Halaman
 st.set_page_config(
     page_title="Bike Sharing Dashboard",
     page_icon="🚲",
     layout="wide"
 )
 
-#  Load Data 
+# Load Data
 @st.cache_data
 def load_data():
     try:
@@ -27,24 +27,21 @@ def load_data():
         st.error("File `dashboard/main_data.csv` tidak ditemukan. Jalankan preprocessing terlebih dahulu.")
         st.stop()
 
-#  Inisialisasi Data 
+# Inisialisasi Data
 df = load_data()
 
-#  Sidebar Filter 
+# Sidebar Filter
 st.sidebar.header("FilterWhere")
-
 selected_years = st.sidebar.multiselect(
     "Tahun",
     options=sorted(df['year'].unique()),
     default=sorted(df['year'].unique())
 )
-
 selected_seasons = st.sidebar.multiselect(
     "Musim",
     options=sorted(df['season_label'].unique()),
     default=sorted(df['season_label'].unique())
 )
-
 selected_weather = st.sidebar.multiselect(
     "Kondisi Cuaca",
     options=sorted(df['weathersit_label'].unique()),
@@ -57,22 +54,20 @@ filtered_df = df[
     (df['season_label'].isin(selected_seasons)) &
     (df['weathersit_label'].isin(selected_weather))
 ]
-
 if filtered_df.empty:
     st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
     st.stop()
 
-#  Header 
+# Header
 st.title("🚲 Bike Sharing Analysis Dashboard")
 st.markdown("""
 Dashboard ini menganalisis pola penggunaan sepeda berdasarkan karakteristik pengguna dan kondisi eksternal.
 """)
 
-#  Metrics Ringkasan 
+# Metrics Ringkasan
 total_rentals = filtered_df['cnt'].sum()
 avg_daily = filtered_df['cnt'].mean()
 casual_ratio = filtered_df['casual_ratio'].mean()
-
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Sewa", f"{total_rentals:,}")
 col2.metric("Rata-rata/Hari", f"{avg_daily:.0f}")
@@ -98,11 +93,12 @@ season_usage['Tipe Pengguna'] = season_usage['Tipe Pengguna'].map({
     'registered': 'Registered'
 })
 
-fig1, ax1 = plt.subplots(figsize=(10, 6))  
+fig1, ax1 = plt.subplots(figsize=(10, 6))
 
 # Hitung nilai maksimum untuk menentukan skala
 max_value = season_usage['Rata-rata Sewa'].max()
-ax1.set_ylim(0, max_value * 1.25)  
+ax1.set_ylim(0, max_value * 1.25)
+
 sns.barplot(
     data=season_usage,
     x='season_label',
@@ -112,12 +108,11 @@ sns.barplot(
     ax=ax1,
     errorbar=None  # Matikan error bar untuk tampilan yang lebih bersih
 )
-
 ax1.set_title('Rata-rata Sewa Harian per Musim oleh Tipe Pengguna', fontsize=14, fontweight='bold')
 ax1.set_xlabel('Musim')
 ax1.set_ylabel('Rata-rata Jumlah Sewa')
 ax1.grid(axis='y', alpha=0.3)
-ax1.set_axisbelow(True)  
+ax1.set_axisbelow(True)
 
 for i, container in enumerate(ax1.containers):
     for j, bar in enumerate(container):
@@ -141,7 +136,7 @@ for i, container in enumerate(ax1.containers):
 
 st.pyplot(fig1)
 
-#  Visualisasi 2: Pengaruh Cuaca (Tetap Diperbaiki) 
+# Visualisasi 2: Pengaruh Cuaca (Tetap Diperbaiki)
 st.subheader("🌤️ Pengaruh Kondisi Cuaca terhadap Total Sewa")
 st.markdown("""
 Kondisi cerah menghasilkan sewa tertinggi.
@@ -199,23 +194,20 @@ ax2.set_axisbelow(True)
 
 st.pyplot(fig2)
 
-#  Insight Utama 
+# Insight Utama
 st.info("""
-🔍 **Insight Utama dari Analisis:**
-
-- **Segmentasi Pengguna:**
-  - Komuter (368 hari): >85% registered → target promosi loyalitas
-  - Rekreasi (162 hari): >35% casual → target promosi akhir pekan & musim panas
-
-- **Faktor Cuaca:**
-  - Suhu ↑ → Sewa ↑ (korelasi kuat: r=0.63)
-  - Hujan ringan → Penurunan sewa hingga 63%
-
-- **Rekomendasi Bisnis:**
-  - Tingkatkan konversi casual → registered via promo musiman
-  - Siapkan sistem notifikasi cuaca untuk antisipasi penurunan sewa
+🔍 Insight Utama dari Analisis:
+Segmentasi Pengguna:
+Komuter (368 hari): >85% registered → target promosi loyalitas
+Rekreasi (162 hari): >35% casual → target promosi akhir pekan & musim panas
+Faktor Cuaca:
+Suhu ↑ → Sewa ↑ (korelasi kuat: r=0.63)
+Hujan ringan → Penurunan sewa hingga 63%
+Rekomendasi Bisnis:
+Tingkatkan konversi casual → registered via promo musiman
+Siapkan sistem notifikasi cuaca untuk antisipasi penurunan sewa
 """)
 
-#  Footer 
+# Footer
 st.markdown("---")
 st.caption("Dashboard ini dibuat untuk memenuhi Proyek Analisis Data Dicoding | Data Source: Bike Sharing Dataset")
