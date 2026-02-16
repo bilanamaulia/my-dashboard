@@ -213,7 +213,7 @@ else:
 
 # Header
 st.title("Bike Sharing Analytics Dashboard")
-st.caption("Analisis Pola Penggunaan Sepeda | Dicoding ID: bilanawati_99")
+st.caption("Dicoding ID: bilanawati_99")
 
 # Hero Metrics
 c1, c2, c3 = st.columns(3)
